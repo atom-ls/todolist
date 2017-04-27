@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.css">
+    <script src="./node_modules/jquery/dist/jquery.js"></script>
+    <script src="./node_modules/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="./node_modules/vue/dist/vue.js"></script>
+</head>
+
+<body>
+    <div class="container-fluid" id="info">
+        <form role="form">
+            <div class="form-group">
+                <!-- 自定义属性指令 -->
+                <!--<label for="usename" v-focus>用户名：</label>-->
+                <label for="usename">用户名：</label>
+                <input type="text" class="form-control" id="usename" placeholder="请输入用户名" v-model="username">
+            </div>
+            <div class="form-group">
+                <label for="age">年龄：</label>
+                <input type="text" class="form-control" id="age" placeholder="请输入年龄" v-model="age" @keydown.enter="add()">
+            </div>
+            <button type="button" class="btn btn-primary" @click="add()">添加</button>
+            <button type="reset" class="btn btn-danger">重置</button>
+            <div class="form-group">
+                <label for="search">筛选（按用户名）：</label>
+                <input type="text" class="form-control" id="search" placeholder="请输筛选条件" v-model="sname">
+                <!-- 带表达式的自定义属性指令 -->
+                <!--<input type="text" v-color="color" class="form-control" id="search" placeholder="请输筛选条件" v-model="sname">-->
+            </div>
+        </form>
+        <table class="table table-bordered table-hover">
+            <caption class="h3 text-info text-center">用户信息表</caption>
+            <thead>
+                <tr class="text-danger">
+                    <th class="text-center">序号</th>
+                    <th class="text-center">用户名</th>
+                    <th class="text-center">年龄</th>
+                    <th class="text-center">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- 1.0 过滤器 -->
+                <!--<tr v-for="{(v,k) in search | filterBy sname">-->
+                <!-- 2.0 过滤器-->
+                <tr v-for="{(v,k) in search">
+                    <td class="text-center col-xs-3">{{k+1}}</td>
+                    <td class="text-center col-xs-3">{{v.username}}</td>
+                    <td class="text-center col-xs-3">{{v.age}}</td>
+                    <td class="text-center col-xs-3">
+                        <button type="button" class="btn btn-primary" data-toggle="modal" href='#modal-id' @click="infoIndex = k">删除</button>
+                    </td>
+                </tr>
+                <tr v-show="userInfo.length == 0 || s_userInfo.length == 0">
+                    <td colspan="4" class="text-center text-muted">
+                        <span>暂无数据...</span>
+                    </td>
+                </tr>
+                <tr v-show="s_userInfo.length != 0 && userInfo.length != 0">
+                    <td colspan="4" class="text-right text-muted">
+                        <button type="button" class="btn btn-danger" data-toggle="modal" href='#modal-id' @click="infoIndex=-1">全部删除</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="modal fade" id="modal-id">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        确认删除{{infoIndex == -1 ? '全部':'此条'}}信息？
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal" @click="dele(infoIndex)">确认</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    //自定义键盘事件
+    // 2.0
+    // Vue.config.keyCodes.F2 = 113;
+    // 1.0
+    // Vue.directive('on').keyCodes.F2 = 113;
+    //自定义属性指令
+    // 1.0
+    // Vue.directive('focus', {
+    //     inserted: function (el) {
+    //         el.focus();     //el表示使用指令的标签对象
+    //     }
+    // });
+    // 带表达式的自定义属性指令
+    // Vue.directive('color', function(el,binding){
+    //     console.log(binding);
+    //     el.style.color = binding.value;
+    // });
+
+    var vm = new Vue({
+        el: '#info',
+        data: {
+            userInfo: [],
+            username: '',
+            age: '',
+            infoIndex: -1,
+            sname: '',
+            s_userInfo: [],
+            color: 'gold'
+        },
+        methods: {
+            add: function () {
+                this.userInfo.push({
+                    username: this.username,
+                    age: this.age
+                })
+            },
+            dele: function (n) {
+                n == -1 ?
+                    this.userInfo = [] :
+                    this.userInfo.splice(this.infoIndex, 1);
+            }
+        },
+        computed: {
+            search: function () {
+                var self = this;
+                return self.s_userInfo = self.userInfo.filter(function (v) {
+                    return v.username.indexOf(self.sname) != -1;
+                });
+
+            }
+        }
+    });
+    function escapeHtml(string){
+        string.replace(/\</g,'\<')
+              .replace(/\>/g,'\>')
+              .replace(/\&/g,'\&')
+              .replace(/\"/g,'\"');
+    }
+</script>
+
+</html>
